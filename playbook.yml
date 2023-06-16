@@ -1,0 +1,10 @@
+---
+- name: slurm_practice1
+  hosts: "all"
+  become: yes
+  roles: 
+    - slurm #one slurm study role
+
+  tasks:
+    - name: echo
+      command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) the end" >> /tmp/ansible.log'
