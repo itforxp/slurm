@@ -1,4 +1,0 @@
----
-# tasks file for slurm
-- name: start
-  command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) a start" >> /tmp/ansible.log'
