@@ -3,7 +3,8 @@
   hosts: "all"
   become: yes
   roles: 
-    - slurm #one slurm study role
+    - slurmdb #slurm db study role
+    - slurm #slurm app study role
 
   tasks:
     - name: echo

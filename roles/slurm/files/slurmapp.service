@@ -1,0 +1,21 @@
+[Unit]
+Description=Slurm App
+After=network.target
+
+[Service]
+User=vagrant
+Group=vagrant
+WorkingDirectory=/var/app/xpaste_practicum
+Environment="SECRET_KEY_BASE=any_string"
+Environment="RAILS_ENV=production"
+Environment="RAILS_LOG_TO_STDOUT=1"
+Environment="DB_HOST=127.0.0.1"
+Environment="DB_PORT=5432"
+Environment="DB_NAME=slurm"
+Environment="DB_USER=slurm"
+Environment="DB_PASSWORD=slurm"
+ExecStart=/bin/bash -c 'bundle exec rake db:migrate && bundle exec puma -b unix:///var/run/puma.sock -e $RAILS_ENV config.ru'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,69 +1,81 @@
 ---
 # tasks file for slurm
-- name: start
-  command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) a start" >> /tmp/ansible.log'
+- name: start time #just to check start
+  ansible.legacy.command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) app start" >> /tmp/ansible.log'
+
+- name: init nginx role from galaxy
+  ansible.legacy.command: bash -c 'ansible-galaxy install nginxinc.nginx'
+
 - name: install packages
-  yum:
+  ansible.builtin.yum:
     name: 
       - "@development"
       - libxml2-devel
-      - postgresql-server
-      - python3-psycopg2
+#      - ruby
+#      - ruby-devel
+      - gcc
+      - make
+      - centos-release-scl
+      - postgresql-devel 
     state: present
-  when: install_packages|default(false) | bool
+#  when: install_packages|default(false) | bool
 
-- name: init db
-  command: postgresql-setup initdb
-  become: yes
-  become_user: postgres
-  args:
-    creates: /var/lib/pgsql/data/pg_hba.conf
-
-- name: modify pga
-  lineinfile:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    line: 'host all		all	127.0.0.1/32	trust'
-    insertafter: 'Host-based IPv4 local connections'
+- name: install ruby
+  ansible.builtin.yum:
+    name: 
+      - rh-ruby27
+      - rh-ruby27-ruby-devel
+      - rh-ruby27-rubygems
+      - rh-ruby27-rubygem-bundler
     state: present
-  become: true
-  become_user: postgres
-#  notify: Restart postgresql service
 
-- name: Restart postgresql service
-  service:
-    name: postgresql
-    state: restarted
+- name: make effictive ruby version and install gems
+  ansible.builtin.shell: |
+      source /opt/rh/rh-ruby27/enable
+      gem install bundler
+  
+#- name: install bundler,puma gem
+#  ansible.builtin.gem:
+#    name: 
+#      - bundler
+#      - puma
+#    state: present
 
-- name: enable service db
-  service:
-    name: postgresql
-    state: started
-    enabled: yes
-
-- name: create db user
-  postgresql_user:
-    name: slurm
-    password: slurm
-    encrypted: yes
-  become: true
-  become_user: postgres
-  vars:
-    ansible_python_interpreter: /bin/python3
-
-- name: create db
-  postgresql_db:
-    name: slurm
-    owner: slurm
-  become: true
-  become_user: postgres
-  vars:
-    ansible_python_interpreter: /bin/python3
-
-
-- name: read settings
-  shell: source "{{ inventory_dir }}"/settings && env
+- name: read settings #depr
+  ansible.builtin.shell: source "{{ inventory_dir }}"/settings && env
   register: env_output
-- name: list settings
-  copy:
+- name: list settings #depr
+  ansible.legacy.copy:
     content: "{{ env_output.stdout }}"
     dest: /tmp/ansible.settings
+
+- name: copy ruby app
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/slurmapp/xpaste_practicum"
+    dest: /var/app/
+    owner: vagrant
+    group: vagrant
+    mode: '0755'
+
+- name: install all dependencies
+  ansible.builtin.shell: |
+    source /opt/rh/rh-ruby27/enable
+    bundle config build.nokogiri --use-system-libraries
+    bundle install --clean --no-cache --without development
+  args: 
+    chdir: /var/app/xpaste_practicum
+  ignore_errors: yes
+
+ 
+- name: copy service file
+  ansible.builtin.copy:
+    src: slurmapp.service
+    dest: /etc/systemd/system/slurmapp.service 
+    mode: '0644'
+
+- name: run and enable
+  ansible.builtin.service:
+    name: slurmapp.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

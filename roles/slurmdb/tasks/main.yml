@@ -1,0 +1,59 @@
+---
+# tasks file for slurm
+- name: start #just to check start
+  command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) a db start" >> /tmp/ansible.log'
+
+- name: install packages
+  yum:
+    name: 
+      - postgresql-server
+      - python3-psycopg2
+    state: present
+  when: install_packages|default(false) | bool
+
+- name: init db
+  command: postgresql-setup initdb
+  become: yes
+  become_user: postgres
+  args:
+    creates: /var/lib/pgsql/data/pg_hba.conf
+
+- name: modify pga
+  lineinfile:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    line: 'host all		all	127.0.0.1/32	trust'
+    insertafter: 'Host-based IPv4 local connections'
+    state: present
+  become: true
+  become_user: postgres
+#  notify: Restart postgresql service
+
+- name: Restart postgresql service
+  service:
+    name: postgresql
+    state: restarted
+
+- name: enable service db
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: create db user
+  postgresql_user:
+    name: slurm
+    password: slurm
+    encrypted: yes
+  become: true
+  become_user: postgres
+  vars:
+    ansible_python_interpreter: /bin/python3
+
+- name: create db
+  postgresql_db:
+    name: slurm
+    owner: slurm
+  become: true
+  become_user: postgres
+  vars:
+    ansible_python_interpreter: /bin/python3
