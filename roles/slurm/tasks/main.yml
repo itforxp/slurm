@@ -4,7 +4,7 @@
   ansible.legacy.command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) app start" >> /tmp/ansible.log'
 
 - name: init nginx role from galaxy
-  ansible.legacy.command: bash -c 'ansible-galaxy install nginxinc.nginx'
+  ansible.legacy.shell: bash -c 'ansible-galaxy install nginxinc.nginx'
 
 - name: install packages
   ansible.builtin.yum:

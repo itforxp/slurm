@@ -1,2 +1,18 @@
 ---
 # tasks file for slurmbalancer
+
+  
+- name: copy nginc conf
+  copy: 
+   src: nginx.conf
+   dest: /etc/nginx/nginx.conf
+   owner: vagrant
+   owner: vagrant
+   mode: "0644"
+
+- name: start nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  

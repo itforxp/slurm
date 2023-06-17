@@ -5,7 +5,8 @@
   roles: 
     - slurmdb #slurm db study role
     - slurm #slurm app study role
-
+    - nginxinc.nginx
+    - slurmbalancer #slurm nginx study role
   tasks:
     - name: echo
       command: bash -c 'echo "$(date +%Y-%m-%d_%H:%M:%S) the end" >> /tmp/ansible.log'
