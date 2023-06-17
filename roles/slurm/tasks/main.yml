@@ -23,15 +23,15 @@
 - name: install ruby
   ansible.builtin.yum:
     name: 
-      - rh-ruby25
-      - rh-ruby25-ruby-devel
-      - rh-ruby25-rubygems
-      - rh-ruby25-rubygem-bundler
+      - rh-ruby26
+      - rh-ruby26-ruby-devel
+      - rh-ruby26-rubygems
+      - rh-ruby26-rubygem-bundler
     state: present
 
 - name: make effictive ruby version and install gems
   ansible.builtin.shell: |
-      source /opt/rh/rh-ruby25/enable
+      source /opt/rh/rh-ruby26/enable
       gem install bundler
   
 #- name: install bundler,puma gem
