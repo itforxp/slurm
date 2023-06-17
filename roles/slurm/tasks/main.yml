@@ -23,15 +23,15 @@
 - name: install ruby
   ansible.builtin.yum:
     name: 
-      - rh-ruby27
-      - rh-ruby27-ruby-devel
-      - rh-ruby27-rubygems
-      - rh-ruby27-rubygem-bundler
+      - rh-ruby25
+      - rh-ruby25-ruby-devel
+      - rh-ruby25-rubygems
+      - rh-ruby25-rubygem-bundler
     state: present
 
 - name: make effictive ruby version and install gems
   ansible.builtin.shell: |
-      source /opt/rh/rh-ruby27/enable
+      source /opt/rh/rh-ruby25/enable
       gem install bundler
   
 #- name: install bundler,puma gem
@@ -59,7 +59,7 @@
 
 - name: install all dependencies
   ansible.builtin.shell: |
-    source /opt/rh/rh-ruby27/enable
+    source /opt/rh/rh-ruby25/enable
     bundle config build.nokogiri --use-system-libraries
     bundle install --clean --no-cache --without development
   args: 
