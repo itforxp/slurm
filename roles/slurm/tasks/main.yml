@@ -23,17 +23,12 @@
 - name: install ruby
   ansible.builtin.yum:
     name: 
-      - rh-ruby26
-      - rh-ruby26-ruby-devel
-      - rh-ruby26-rubygems
-      - rh-ruby26-rubygem-bundler
+      - rh-ruby27
+      - rh-ruby27-ruby-devel
+      - rh-ruby27-rubygems
+      - rh-ruby27-rubygem-bundler
     state: present
 
-- name: make effictive ruby version and install gems
-  ansible.builtin.shell: |
-      source /opt/rh/rh-ruby26/enable
-      gem install bundler
-  
 #- name: install bundler,puma gem
 #  ansible.builtin.gem:
 #    name: 
@@ -57,11 +52,21 @@
     group: vagrant
     mode: '0755'
 
+- name: make effictive ruby version and install gems
+  ansible.builtin.shell: |
+      source /opt/rh/rh-ruby27/enable
+      gem install bundler:1.6.2
+      gem install nokogiri:1.8.2
+      gem install rails-dom-testing:2.0.3
+  args:
+    chdir: /var/app/xpaste_practicum
+
 - name: install all dependencies
   ansible.builtin.shell: |
-    source /opt/rh/rh-ruby25/enable
+    source /opt/rh/rh-ruby27/enable
     bundle config build.nokogiri --use-system-libraries
-    bundle install --clean --no-cache --without development
+    bundle install
+    #bundle install --clean --no-cache --without development
   args: 
     chdir: /var/app/xpaste_practicum
   ignore_errors: yes
